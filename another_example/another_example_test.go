@@ -2,7 +2,7 @@ package another_example_test
 
 import (
 	"fmt"
-	. "github.com/orivil/session"
+	. "gopkg.in/orivil/session.v0"
 	"net/http"
 	"net/url"
 	"time"
