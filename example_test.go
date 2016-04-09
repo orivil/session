@@ -1,7 +1,7 @@
 package session_test
 
 import (
-	. "github.com/orivil/session"
+	. "gopkg.in/orivil/session.v0"
 	"net/http"
 )
 
