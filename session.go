@@ -1,3 +1,8 @@
+// Copyright 2016 orivil Authors. All rights reserved.
+// Use of this source code is governed by a MIT-style
+// license that can be found in the LICENSE file.
+
+// Package session provide a full-featured session component.
 package session
 
 import (
