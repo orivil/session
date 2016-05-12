@@ -1,3 +1,7 @@
+// Copyright 2016 orivil Authors. All rights reserved.
+// Use of this source code is governed by a MIT-style
+// license that can be found in the LICENSE file.
+
 package session
 
 import (
@@ -27,6 +31,17 @@ func (idc *IdDecoder) Read(w http.ResponseWriter, r *http.Request) (id string) {
 		id = c.Value
 	}
 	// update cookie max age or send a new cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:   idc.cookieKey,
+		Value:  id,
+		Path:   "/",
+		MaxAge: idc.maxAge,
+	})
+	return
+}
+
+func (idc *IdDecoder) New(w http.ResponseWriter) (id string) {
+	id = uuid.NewV4().String()
 	http.SetCookie(w, &http.Cookie{
 		Name:   idc.cookieKey,
 		Value:  id,

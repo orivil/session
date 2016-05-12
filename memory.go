@@ -1,6 +1,12 @@
+// Copyright 2016 orivil Authors. All rights reserved.
+// Use of this source code is governed by a MIT-style
+// license that can be found in the LICENSE file.
+
 package session
 
-// memoryStorage for store session in memory, Because
+// memoryStorage for store session in memory. Because "newSession",
+// "Destroy" and "Read" function are in the same GC time, and the "Write"
+// function didn't used, so it is not necessary to add a locker
 type memoryStorage struct {
 	sessions map[string]*Session
 }
@@ -11,30 +17,26 @@ func newMemoryStorage() *memoryStorage {
 	}
 }
 
-// Because "newSession", "Destroy" and "Read" function are in the same GC time, and the "Write"
-// function didn't used, so this is not necessary to add a locker
-func (sh *memoryStorage) Destroy(ids []string) (destroied []string) {
+func (sh *memoryStorage) Destroy(ids []string) (destroyed []string) {
 	for _, id := range ids {
 		delete(sh.sessions, id)
 	}
-	destroied = ids
+	destroyed = ids
 	return
 }
 
-func (sh *memoryStorage) newSession(id string) *Session {
-	s := New(id)
-	sh.sessions[id] = s
-	return s
-}
-
 func (sh *memoryStorage) Read(id string) *Session {
-
-	return sh.sessions[id]
+	if s, ok := sh.sessions[id]; ok {
+		return s
+	} else {
+		s = New(id)
+		sh.sessions[id] = s
+		return s
+	}
 }
 
-// GetAll for implement Storage interface, it's useless for memory storage
+// GetAll for implement Storage interface
 func (sh *memoryStorage) GetAll() (ids []string) { return }
 
-// Write for implement Storage interface, it's useless for memory storage
-// The session was stored when it be created, see the "Read" function
+// Write for implement Storage interface
 func (sh *memoryStorage) Write(s *Session) {}
