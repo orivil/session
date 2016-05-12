@@ -1,9 +1,12 @@
+// Copyright 2016 orivil Authors. All rights reserved.
+// Use of this source code is governed by a MIT-style
+// license that can be found in the LICENSE file.
+
 package session
 
 import (
 	"log"
 	"net/http"
-	"time"
 )
 
 var MemoryGC *SessionGC
@@ -11,20 +14,11 @@ var PermanentGC *SessionGC
 
 func init() {
 	mStorage := newMemoryStorage()
-	memoryConstructor := func(id string) *Session {
 
-		return mStorage.newSession(id)
-	}
-
-	permanentConstructor := func(id string) *Session {
-
-		return New(id)
-	}
-
-	MemoryGC = NewSessionGC(memoryConstructor)
+	MemoryGC = NewSessionGC()
 	MemoryGC.SetStorage(mStorage)
 
-	PermanentGC = NewSessionGC(permanentConstructor)
+	PermanentGC = NewSessionGC()
 
 	// set default options
 	maxAge := 45
@@ -47,17 +41,19 @@ func SetStorage(s Storage) {
 }
 
 func NewMemorySession(w http.ResponseWriter, r *http.Request) *Session {
-
-	return MemoryGC.Read(w, r)
+	sessionID := MemoryGC.GetID(w, r)
+	return MemoryGC.Read(sessionID)
 }
 
 func NewPermanentSession(w http.ResponseWriter, r *http.Request) *Session {
 
-	return PermanentGC.Read(w, r)
+	sessionID := PermanentGC.GetID(w, r)
+	return PermanentGC.Read(sessionID)
 }
 
 func StorePermanentSession(s *Session) {
-	if CheckChanged(s) {
+	if s.changed {
+		s.changed = false
 		PermanentGC.storage.Write(s)
 	}
 }
@@ -68,15 +64,6 @@ func Log() {
 }
 
 func printmsg(gc *SessionGC, name string) {
-	expired := 0
-	now := time.Now()
-	gc.mu.Lock()
-	defer gc.mu.Unlock()
 
-	for _, t := range gc.times {
-		if now.After(t) {
-			expired++
-		}
-	}
-	log.Printf("%s session left: %d, expired: %d\n", name, len(gc.times), expired)
+	log.Printf("%s session left: %d\n", name, len(gc.times))
 }
