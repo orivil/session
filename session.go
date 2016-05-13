@@ -36,9 +36,9 @@ func New(id string) *Session {
 	}
 }
 
-// helper function
-func CheckChanged(s *Session) bool {
-	return s.changed
+func (s *Session) ID() string {
+
+	return s.Id
 }
 
 func (s *Session) SetData(key string, data interface{}) {
